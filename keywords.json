@@ -1,0 +1,68 @@
+[
+  {
+    "title": "Google",
+    "description": "Search the web with Google",
+    "path": "https://www.google.com",
+    "keywords": ["g", "gg", "search", "web", "구글"]
+  },
+  {
+    "title": "YouTube",
+    "description": "Watch videos on YouTube",
+    "path": "https://www.youtube.com",
+    "keywords": ["yt", "video", "tube", "유튜브"]
+  },
+  {
+    "title": "ChatGPT",
+    "description": "AI-powered assistant and chat",
+    "path": "https://chatgpt.com",
+    "keywords": ["ai", "openai", "챗지피티"]
+  },
+  {
+    "title": "GitHub",
+    "description": "Manage your code repositories",
+    "path": "https://github.com",
+    "keywords": ["gh", "repo", "깃허브"]
+  },
+  {
+    "title": "Stack Overflow",
+    "description": "Developer Q&A and solutions",
+    "path": "https://stackoverflow.com",
+    "keywords": ["so", "dev", "help"]
+  },
+  {
+    "title": "VS Code",
+    "description": "Open Visual Studio Code editor",
+    "path": "C:\\Users\\%USERNAME%\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+    "keywords": ["visual studio", "editor", "비주얼 스튜디오"]
+  },
+  {
+    "title": "Discord",
+    "description": "Open Discord messenger",
+    "path": "C:\\Users\\%USERNAME%\\AppData\\Local\\Discord\\Update.exe --processStart Discord.exe",
+    "keywords": ["dc", "chat", "comm", "디스코드"]
+  },
+  {
+    "title": "Firefox",
+    "description": "Launch Firefox browser",
+    "path": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+    "keywords": ["ff", "browser", "파이어폭스", "파폭", "브라우저"]
+  },
+  {
+    "title": "Naver",
+    "description": "Korean portal and mail services",
+    "path": "https://www.naver.com",
+    "keywords": ["네이버", "kr", "portal"]
+  },
+  {
+    "title": "KakaoTalk",
+    "description": "Korean KakaoTalk messenger",
+    "path": "C:\\Program Files\\Kakao\\KakaoTalk\\KakaoTalk.exe",
+    "keywords": ["카카오톡", "카톡", "ㅋㅌ", "kt"]
+  },
+  {
+    "title": "Open Config Folder",
+    "description": "Manage Alias Flow settings and keywords.json",
+    "path": "open_config_folder",
+    "keywords": ["config", "settings", "backup", "set"]
+  }
+]
