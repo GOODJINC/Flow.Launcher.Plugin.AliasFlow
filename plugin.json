@@ -4,7 +4,7 @@
   "Name": "Alias Flow",
   "Description": "Create custom keyword aliases for any URL or local application.",
   "Author": "GOODJINC",
-  "Version": "1.0.0",
+  "Version": "1.1.0",
   "Language": "python",
   "Website": "https://github.com/goodjinc/Flow.Launcher.Plugin.AliasFlow",
   "ExecuteFileName": "main.py",
