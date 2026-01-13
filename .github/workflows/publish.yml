@@ -1,0 +1,44 @@
+name: Publish Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    # 아래 예외 사항에 대해서는 배포 X
+    paths-ignore:
+      - '.github/workflows/*'
+      - 'README.md'
+      - 'readme.ko.md'
+      - '.gitignore'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      # 소스 코드 체크아웃
+      - uses: actions/checkout@v4
+
+      # plugin.json에서 Version 값 추출
+      - name: Get Version
+        id: version
+        uses: notiz-dev/github-action-json-property@release
+        with: 
+          path: 'plugin.json'
+          prop_name: 'Version'
+
+      # 플러그인 실행에 필요한 파일들을 ZIP으로 압축 (.git, .github 등 제외)
+      - name: Zip extension
+        run: |
+          zip -r Flow.Launcher.Plugin.AliasFlow.zip . -x ".git/*" ".github/*" ".gitignore" "error.log" "*.md"
+
+      # GitHub Releases 압축 파일을 업로드하고 정식 배포
+      - name: Publish Release
+        if: success()
+        uses: softprops/action-gh-release@v2
+        with:
+          files: 'Flow.Launcher.Plugin.AliasFlow.zip'
+          # plugin.json의 버전을 태그 이름으로 사용
+          tag_name: "v${{steps.version.outputs.prop}}"
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
