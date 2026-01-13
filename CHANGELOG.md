@@ -1,4 +1,4 @@
-# 📝 CHANGELOG.md
+# 📝 CHANGELOG.md (한국어로 제공)
 
 이 프로젝트의 주요 변경사항 정리
 
@@ -33,3 +33,7 @@
 - GitHub Actions 자동 배포: 자동으로 Flow.Launcher.Plugin.AliasFlow.zip 파일을 생성하여 Releases에 업로드
 
 - 다국어 문서 지원: 영어(readme.md) 및 한국어(readme.ko.md) 매뉴얼 작성
+
+---
+
+참고 : https://keepachangelog.com/en/1.0.0/

@@ -11,6 +11,10 @@ on:
       - 'readme.ko.md'
       - '.gitignore'
 
+# 릴리스 생성을 위해 쓰기 권한 부여
+permissions:
+  contents: write
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -24,7 +28,7 @@ jobs:
         uses: notiz-dev/github-action-json-property@release
         with: 
           path: 'plugin.json'
-          prop_name: 'Version'
+          prop_path: 'Version'
 
       # 플러그인 실행에 필요한 파일들을 ZIP으로 압축 (.git, .github 등 제외)
       - name: Zip extension
