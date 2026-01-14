@@ -66,7 +66,7 @@ jobs:
         working-directory: src
         run: dotnet publish -c Release -o ..\dist\tmp
 
-      - name: Assemble package (copy required files, remove pdb, zip)
+            - name: Assemble package (copy required files, remove pdb, zip)
         if: steps.tagcheck.outputs.exists != 'true'
         shell: pwsh
         run: |
@@ -75,15 +75,22 @@ jobs:
           if (!(Test-Path $tmp)) { throw "Missing $tmp" }
 
           Copy-Item "src\plugin.json"  "$tmp\plugin.json"  -Force
-          Copy-Item "src\icon.png"     "$tmp\icon.png"     -Force
-          Copy-Item "src\keywords.json" "$tmp\keywords.json" -Force
+
+          if (Test-Path "src\icon.png") {
+            Copy-Item "src\icon.png" "$tmp\icon.png" -Force
+          }
+
+          if (Test-Path "src\keywords.json") {
+            Copy-Item "src\keywords.json" "$tmp\keywords.json" -Force
+          }
 
           Remove-Item "$tmp\*.pdb" -ErrorAction SilentlyContinue
 
-          $ver = "${{ steps.ver.outputs.version }}"
-          $zip = "dist\AliasFlow-$ver.zip"
+          $zip = "dist\Flow.Launcher.Plugin.AliasFlow.zip"
           if (Test-Path $zip) { Remove-Item $zip -Force }
+
           Compress-Archive "$tmp\*" $zip -Force
+
 
       - name: Create Git tag
         if: steps.tagcheck.outputs.exists != 'true'
@@ -103,4 +110,4 @@ jobs:
           name: Alias Flow ${{ steps.ver.outputs.version }}
           generate_release_notes: true
           files: |
-            dist/AliasFlow-${{ steps.ver.outputs.version }}.zip
+            dist/Flow.Launcher.Plugin.AliasFlow.zip
