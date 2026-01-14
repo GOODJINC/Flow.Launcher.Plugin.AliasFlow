@@ -1,6 +1,7 @@
-// ViewModels/SettingsViewModel.cs
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Flow.Launcher.Plugin.AliasFlow.Models;
 using Flow.Launcher.Plugin.AliasFlow.Services;
@@ -11,52 +12,56 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
 {
     private readonly KeywordRepository _repo;
 
-    public ObservableCollection<AliasItem> Items { get; } = new();
+    public ObservableCollection<KeywordEntry> Items { get; } = new();
 
-    private AliasItem? _selected;
-    public AliasItem? Selected
+    private KeywordEntry? _selected;
+    public KeywordEntry? Selected
     {
         get => _selected;
         set { _selected = value; OnPropertyChanged(); }
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
-
-    // 플러그인 본체가 구독해서 런타임 캐시 갱신에 사용
     public event EventHandler? KeywordsChanged;
 
     public SettingsViewModel(KeywordRepository repo)
     {
         _repo = repo;
-
         foreach (var it in _repo.Load())
             Items.Add(it);
     }
 
-    public void Add(AliasItem item)
+    public void Add(KeywordEntry item)
     {
-        Validate(item, allowSameKeyword: false);
+        Validate(item, allowSameTitle: false);
         Items.Add(item);
         Persist();
     }
 
-    public void Update(AliasItem original, AliasItem edited)
+    public void Update(KeywordEntry original, KeywordEntry edited)
     {
-        // keyword 변경 가능하게 할 경우 중복 체크 필요
-        var keywordChanged = !string.Equals(original.Keyword, edited.Keyword, StringComparison.OrdinalIgnoreCase);
-        Validate(edited, allowSameKeyword: !keywordChanged);
+        var titleChanged = !string.Equals(original.Title, edited.Title, StringComparison.OrdinalIgnoreCase);
+        Validate(edited, allowSameTitle: !titleChanged);
 
-        original.Keyword = edited.Keyword;
-        original.Target = edited.Target;
-        original.Arguments = edited.Arguments;
+        original.Title = edited.Title;
         original.Description = edited.Description;
+        original.Path = edited.Path;
+        original.Keywords = edited.Keywords ?? new();
 
         Persist();
     }
 
-    public void Delete(AliasItem item)
+    public void Delete(KeywordEntry item)
     {
         Items.Remove(item);
+        Persist();
+    }
+
+    public void ReplaceAll(System.Collections.Generic.IEnumerable<KeywordEntry> newItems)
+    {
+        Items.Clear();
+        foreach (var it in newItems)
+            Items.Add(it);
         Persist();
     }
 
@@ -66,29 +71,18 @@ public sealed class SettingsViewModel : INotifyPropertyChanged
         KeywordsChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    public void ReplaceAll(IEnumerable<AliasItem> newItems)
+    private void Validate(KeywordEntry item, bool allowSameTitle)
     {
-        Items.Clear();
-        foreach (var it in newItems)
-            Items.Add(it);
+        if (string.IsNullOrWhiteSpace(item.Title))
+            throw new InvalidOperationException("Title은 비어 있을 수 없습니다.");
 
-        Persist();
-    }
+        if (string.IsNullOrWhiteSpace(item.Path))
+            throw new InvalidOperationException("Path(URL/경로)는 비어 있을 수 없습니다.");
 
-    private void Validate(AliasItem item, bool allowSameKeyword)
-    {
-        if (string.IsNullOrWhiteSpace(item.Keyword))
-            throw new InvalidOperationException("Keyword는 비어 있을 수 없습니다.");
-
-        if (string.IsNullOrWhiteSpace(item.Target))
-            throw new InvalidOperationException("Target(URL/경로)는 비어 있을 수 없습니다.");
-
-        if (!allowSameKeyword)
+        if (!allowSameTitle)
         {
-            var exists = Items.Any(x =>
-                string.Equals(x.Keyword.Trim(), item.Keyword.Trim(), StringComparison.OrdinalIgnoreCase));
-            if (exists)
-                throw new InvalidOperationException("이미 존재하는 Keyword입니다.");
+            var exists = Items.Any(x => string.Equals(x.Title.Trim(), item.Title.Trim(), StringComparison.OrdinalIgnoreCase));
+            if (exists) throw new InvalidOperationException("이미 존재하는 Title입니다.");
         }
     }
 

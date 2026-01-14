@@ -15,12 +15,12 @@
                   CanUserAddRows="False"
                   IsReadOnly="True"
                   Margin="0,0,0,10">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Keyword" Binding="{Binding Keyword}" Width="140"/>
-                <DataGridTextColumn Header="Target" Binding="{Binding Target}" Width="*"/>
-                <DataGridTextColumn Header="Args" Binding="{Binding Arguments}" Width="160"/>
-                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="220"/>
-            </DataGrid.Columns>
+<DataGrid.Columns>
+  <DataGridTextColumn Header="Keyword" Binding="{Binding Title}" Width="160"/>
+  <DataGridTextColumn Header="Target"  Binding="{Binding Path}" Width="*"/>
+<DataGridTextColumn Header="Args" Binding="{Binding KeywordsDisplay}" Width="220"/>
+  <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="220"/>
+</DataGrid.Columns>
         </DataGrid>
 
         <DockPanel Grid.Row="1" LastChildFill="False">
