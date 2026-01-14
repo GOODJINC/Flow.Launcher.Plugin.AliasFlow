@@ -1,0 +1,42 @@
+<!-- Views/AliasEditWindow.xaml -->
+<Window x:Class="Flow.Launcher.Plugin.AliasFlow.Views.AliasEditWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Alias Item" Height="280" Width="520"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="110"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Keyword"/>
+        <TextBox x:Name="KeywordBox" Grid.Row="0" Grid.Column="1" Margin="0,0,0,8"/>
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Target"/>
+        <TextBox x:Name="TargetBox" Grid.Row="1" Grid.Column="1" Margin="0,0,0,8"/>
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Arguments"/>
+        <TextBox x:Name="ArgsBox" Grid.Row="2" Grid.Column="1" Margin="0,0,0,8"/>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Margin="0,0,8,8" VerticalAlignment="Center" Text="Description"/>
+        <TextBox x:Name="DescBox" Grid.Row="3" Grid.Column="1" Margin="0,0,0,8"/>
+
+        <TextBlock x:Name="ErrorText" Grid.Row="4" Grid.ColumnSpan="2"
+                   Foreground="Tomato" TextWrapping="Wrap" />
+
+        <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Width="90" Margin="0,0,8,0" Content="Cancel" Click="Cancel_Click"/>
+            <Button Width="90" Content="OK" Click="Ok_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

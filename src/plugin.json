@@ -1,0 +1,12 @@
+{
+  "ID": "a0e12ab7-7f1e-4192-b37b-81e1d4ff8358",
+  "ActionKeyword": "af",
+  "Name": "Alias Flow",
+  "Description": "Create custom keyword aliases for any URL or local application.",
+  "Author": "GOODJINC",
+  "Version": "2.0.0",
+  "Language": "csharp",
+  "Website": "https://github.com/goodjinc/Flow.Launcher.Plugin.AliasFlow",
+  "ExecuteFileName": "Flow.Launcher.Plugin.AliasFlow.dll",
+  "IcoPath": "icon.png"
+}

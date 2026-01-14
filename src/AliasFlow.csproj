@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Flow.Launcher.Plugin 5.1.0은 .NET 9 타겟 필요 -->
+    <TargetFramework>net9.0-windows7.0</TargetFramework>
+
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- DLL 이름을 확정 (plugin.json ExecuteFileName과 일치시킴) -->
+    <AssemblyName>Flow.Launcher.Plugin.AliasFlow</AssemblyName>
+    <RootNamespace>Flow.Launcher.Plugin.AliasFlow</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Flow.Launcher.Plugin" Version="5.1.0" />
+  </ItemGroup>
+
+</Project>
