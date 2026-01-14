@@ -9,12 +9,14 @@ namespace Flow.Launcher.Plugin.AliasFlow.Services;
 
 public sealed class KeywordRepository
 {
+    // ✅ BOM 없는 UTF-8
+    private static readonly Encoding Utf8NoBom = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+
+    // ✅ 한글 유니코드 이스케이프 방지 + 보기 좋게 들여쓰기
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
-        PropertyNamingPolicy = null, // title / description / path 그대로 유지
+        PropertyNamingPolicy = null, // title/path/keywords 그대로 유지
         WriteIndented = true,
-
-        // 🔑 핵심: 한글 유니코드 이스케이프 방지
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
@@ -30,7 +32,9 @@ public sealed class KeywordRepository
         if (!File.Exists(KeywordsJsonPath))
             return new List<KeywordEntry>();
 
-        var json = File.ReadAllText(KeywordsJsonPath, Encoding.UTF8);
+        // BOM 있든 없든 정상 처리됨(없으면 Utf8NoBom으로 읽기)
+        var json = File.ReadAllText(KeywordsJsonPath, Utf8NoBom);
+
         return JsonSerializer.Deserialize<List<KeywordEntry>>(json, JsonOptions)
                ?? new List<KeywordEntry>();
     }
@@ -40,12 +44,15 @@ public sealed class KeywordRepository
         Directory.CreateDirectory(Path.GetDirectoryName(KeywordsJsonPath)!);
 
         var json = JsonSerializer.Serialize(items, JsonOptions);
-        File.WriteAllText(KeywordsJsonPath, json, Encoding.UTF8);
+
+        // ✅ BOM 없는 UTF-8로 저장
+        File.WriteAllText(KeywordsJsonPath, json, Utf8NoBom);
     }
 
     public List<KeywordEntry> ImportFromFile(string filePath)
     {
-        var json = File.ReadAllText(filePath, Encoding.UTF8);
+        var json = File.ReadAllText(filePath, Utf8NoBom);
+
         return JsonSerializer.Deserialize<List<KeywordEntry>>(json, JsonOptions)
                ?? new List<KeywordEntry>();
     }
@@ -53,6 +60,8 @@ public sealed class KeywordRepository
     public void ExportToFile(string filePath, IEnumerable<KeywordEntry> items)
     {
         var json = JsonSerializer.Serialize(items, JsonOptions);
-        File.WriteAllText(filePath, json, Encoding.UTF8);
+
+        // ✅ BOM 없는 UTF-8로 저장
+        File.WriteAllText(filePath, json, Utf8NoBom);
     }
 }
