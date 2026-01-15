@@ -28,15 +28,55 @@ public sealed class Main : IPlugin, ISettingProvider
     {
         _context = context;
 
+        // (A) 플러그인 설치 폴더(읽기 전용일 수 있음): icon.png / 기본 keywords.json이 들어있는 위치
         var pluginDir = context.CurrentPluginMetadata?.PluginDirectory;
         if (string.IsNullOrWhiteSpace(pluginDir))
             pluginDir = AppDomain.CurrentDomain.BaseDirectory;
 
-        _repo = new KeywordRepository(pluginDir);
+        // (B) ✅ 사용자 데이터 폴더(쓰기 보장): keywords.json 저장/로드는 무조건 여기서만
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var dataDir = Path.Combine(appData, "FlowLauncher", "Settings", "Plugins", "AliasFlow");
+        var dataPath = Path.Combine(dataDir, "keywords.json");
+
+        // (C) 최초 1회: 패키징된 기본 keywords.json이 있으면 사용자 데이터 경로로 복사
+        try
+        {
+            if (!File.Exists(dataPath))
+            {
+                var packaged = Path.Combine(pluginDir, "keywords.json");
+                if (File.Exists(packaged))
+                {
+                    Directory.CreateDirectory(dataDir);
+                    File.Copy(packaged, dataPath, overwrite: false);
+                }
+                else
+                {
+                    // 기본 파일도 없으면 빈 파일로 시작(Repository.Save에서 폴더 생성)
+                    Directory.CreateDirectory(dataDir);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            NotifyError("Alias Flow", $"Init file setup failed: {ex.Message}");
+        }
+
+        // (D) ✅ Repository는 dataPath 기반으로 동작
+        _repo = new KeywordRepository(dataPath);
         _settingsVm = new SettingsViewModel(_repo);
 
-        _cache = _repo.Load();
+        // (E) 캐시 로드
+        try
+        {
+            _cache = _repo.Load();
+        }
+        catch (Exception ex)
+        {
+            _cache = new();
+            NotifyError("Alias Flow", $"Load failed: {ex.Message}");
+        }
 
+        // (F) 설정 변경 시 캐시 리로드
         _settingsVm.KeywordsChanged += (_, __) =>
         {
             try
@@ -105,7 +145,6 @@ public sealed class Main : IPlugin, ISettingProvider
         try
         {
             // 1) Hotkey 우선
-
             var hk = (x.Hotkey ?? "").Trim();
             if (!string.IsNullOrWhiteSpace(hk))
             {
@@ -115,12 +154,10 @@ public sealed class Main : IPlugin, ISettingProvider
                 // hotkey 실패해도 path가 있으면 이어서 시도
             }
 
-
             // 2) Path 실행
             var rawPath = (x.Path ?? "").Trim();
             if (string.IsNullOrWhiteSpace(rawPath))
             {
-                // hotkey도 없고 path도 없으면 실행할 게 없음
                 NotifyError("Alias Flow", "No action: both hotkey and path are empty.");
                 return false;
             }
@@ -152,7 +189,6 @@ public sealed class Main : IPlugin, ISettingProvider
             else if (Directory.Exists(exe))
                 wd = exe;
 
-            // 핵심: UseShellExecute=true로 OS에 맡김 (프로그램/파일/폴더/링크 모두)
             var opened = TryOpenWithShellExecute(exe, args, wd);
             if (!opened)
             {
@@ -193,7 +229,7 @@ public sealed class Main : IPlugin, ISettingProvider
         }
         catch
         {
-            // Notification 자체가 실패해도 플러그인이 죽지 않게 무시
+            // ignore
         }
     }
 
@@ -211,11 +247,9 @@ public sealed class Main : IPlugin, ISettingProvider
     {
         var s = (input ?? "").Trim();
 
-        // 양끝 따옴표 제거
         if (s.Length >= 2 && s.StartsWith("\"", StringComparison.Ordinal) && s.EndsWith("\"", StringComparison.Ordinal))
             s = s.Substring(1, s.Length - 2);
 
-        // 환경변수 확장 (%USERNAME% 등)
         s = Environment.ExpandEnvironmentVariables(s);
 
         return s.Trim();
@@ -246,12 +280,6 @@ public sealed class Main : IPlugin, ISettingProvider
         }
     }
 
-    /// <summary>
-    /// 공백 포함 경로를 따옴표 없이 넣어도 실행되도록:
-    /// - 전체가 파일/폴더면 그대로 exe
-    /// - 아니면 토큰을 누적하며 실제 존재하는 경로를 찾고 나머지를 args로 분리
-    /// - 마지막 fallback: 첫 토큰 exe, 나머지 args
-    /// </summary>
     private static void ParseExecutableAndArgs(string raw, out string exe, out string args)
     {
         exe = "";
@@ -261,7 +289,6 @@ public sealed class Main : IPlugin, ISettingProvider
         if (string.IsNullOrWhiteSpace(s))
             return;
 
-        // 전체가 파일/폴더면 그대로
         if (File.Exists(s) || Directory.Exists(s))
         {
             exe = s;
@@ -269,7 +296,6 @@ public sealed class Main : IPlugin, ISettingProvider
             return;
         }
 
-        // "C:\...\app.exe" args...
         if (s.StartsWith("\"", StringComparison.Ordinal))
         {
             var end = s.IndexOf('"', 1);
@@ -281,11 +307,9 @@ public sealed class Main : IPlugin, ISettingProvider
             }
         }
 
-        // 공백 토큰 분리
         var tokens = Regex.Matches(s, @"[^\s]+").Select(m => m.Value).ToList();
         if (tokens.Count == 0) return;
 
-        // 누적하며 존재하는 경로 찾기
         for (int i = 0; i < tokens.Count; i++)
         {
             var candidate = string.Join(" ", tokens.Take(i + 1));
@@ -299,7 +323,6 @@ public sealed class Main : IPlugin, ISettingProvider
             }
         }
 
-        // 마지막 fallback
         exe = ExpandAndClean(tokens[0]);
         args = string.Join(" ", tokens.Skip(1));
     }
@@ -312,7 +335,6 @@ public sealed class Main : IPlugin, ISettingProvider
     {
         if (string.IsNullOrWhiteSpace(qInitial)) return 0;
 
-        // Title 우선
         var titleInitial = KoreanInitialSearch.ToInitialString(x.Title ?? "");
         if (!string.IsNullOrWhiteSpace(titleInitial))
         {
@@ -320,7 +342,6 @@ public sealed class Main : IPlugin, ISettingProvider
             if (titleInitial.Contains(qInitial, StringComparison.Ordinal)) return 400;
         }
 
-        // Keywords
         if (x.Keywords is not null)
         {
             foreach (var k in x.Keywords)
@@ -330,20 +351,16 @@ public sealed class Main : IPlugin, ISettingProvider
             }
         }
 
-        // Description
         var di = KoreanInitialSearch.ToInitialString(x.Description ?? "");
         if (di.Contains(qInitial, StringComparison.Ordinal)) return 200;
 
-        // Path
         var pi = KoreanInitialSearch.ToInitialString(x.Path ?? "");
         if (pi.Contains(qInitial, StringComparison.Ordinal)) return 100;
 
-        // Hotkey도 초성 검색 대상에 넣을 이유는 거의 없지만, 원하면 확장 가능
         return 0;
     }
 }
 
-// 파일 내에 같이 둬도 되고, 별도 파일로 분리해도 됨
 internal static class KoreanInitialSearch
 {
     private static readonly char[] Choseong =
@@ -380,16 +397,14 @@ internal static class KoreanInitialSearch
 
         foreach (var c in text)
         {
-            // 한글 음절 범위: AC00–D7A3
             if (c >= 0xAC00 && c <= 0xD7A3)
             {
                 int syllableIndex = c - 0xAC00;
-                int choseongIndex = syllableIndex / 588; // 21*28
+                int choseongIndex = syllableIndex / 588;
                 sb.Append(Choseong[choseongIndex]);
             }
             else
             {
-                // 한글이 아니면 그대로(영문/숫자 등)
                 sb.Append(c);
             }
         }
