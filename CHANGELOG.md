@@ -25,6 +25,14 @@
     - modifier / main key 분리 및 실행 순서 안정화
 - Hotkey 실행 시 modifier → main → modifier 해제 순서로 입력되도록 동작 방식 정교화
 
+### Documentation
+- README 전면 개편 (한글 / 영어)
+  - 플러그인 사용 방법, 실행 방식, Hotkey 기능 정리
+  - Import / Export 및 presets 사용 가이드 추가
+- 국가별 preset 예제(Default / KR / CN / JP) 제공
+  - 기본값 중심의 샘플 구성
+  - 사용자 커스터마이징 전제 설계
+
 ## [2.0.1] - 2026-01-14
 
 ### Added
