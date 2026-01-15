@@ -17,4 +17,9 @@
     <PackageReference Include="Flow.Launcher.Plugin" Version="5.1.0" />
   </ItemGroup>
 
+  <!-- JetBrains.Annotations.dll 이 산출물/릴리즈에 포함되지 않도록 (전이 의존성 포함) -->
+  <ItemGroup>
+    <PackageReference Update="JetBrains.Annotations" PrivateAssets="all" ExcludeAssets="runtime" />
+  </ItemGroup>
+
 </Project>
