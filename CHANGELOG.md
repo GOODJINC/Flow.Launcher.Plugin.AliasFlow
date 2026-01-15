@@ -5,33 +5,32 @@
 ## [2.0.2] - 2026-01-15
 
 ### Added
-- 키워드 실행 시 글로벌 키보드 단축키(Hotkey) 트리거 기능 추가
-    - hotkey 필드를 통해 Ctrl+Shift+Space 등 전역 단축키를 직접 실행 가능
-    - path 실행 없이 단축키 기반으로 동작하는 앱(예: 1Password) 지원
-
-### Fixed
-- Hotkey 실행 시 SendInput failed (Win32Error=87) 오류가 발생하던 문제 수정
-    - Win32 INPUT 구조체 크기 불일치로 인한 오류 원인을 해결
-    - x64 환경에서 OS 기대 크기에 맞도록 INPUTUNION 구조 재정의
-- Hotkey 실행 실패 시 원인을 알 수 없던 문제 개선
-        - 실패 시 Win32 Error 코드 및 상세 원인을 사용자 알림으로 표시하도록 개선
-- Hotkey 기능 추가 이후 웹 URL / 로컬 프로그램 실행이 동작하지 않던 문제 수정
-- 실행 분기 로직을 재정리하여 hotkey / path 실행이 서로 간섭하지 않도록 처리
+- 키워드 실행 시 글로벌 키보드 단축키(Hotkey) 트리거 기능 정식 지원
+- hotkey 필드를 통해 Ctrl+Shift+Space 등 전역 단축키 실행 가능
+- path 실행 없이 단축키 기반으로 동작하는 앱(예: 1Password) 지원
+- Settings UI: Hotkey 입력 안내 문구 및 Clear(✕) 버튼 추가
+- Settings UI: 항목 편집을 위한 레이아웃 및 가이드 문구 개선
 
 ### Changed
-- 런타임에 필요하지 않은 JetBrains.Annotations.dll 파일을 릴리즈 산출물에서 제외
-- Hotkey 입력 파싱 로직 강화
-    - Ctrl + Shift + Space, ctrl+shift+space 등 다양한 표기 방식 허용
-    - modifier / main key 분리 및 실행 순서 안정화
-- Hotkey 실행 시 modifier → main → modifier 해제 순서로 입력되도록 동작 방식 정교화
+- Hotkey 편집 방식을 키 캡처 방식 → 문자열 직접 입력 방식으로 변경
+- Ctrl+Shift+Space, Alt+F2 등 명시적 문자열 입력 방식 채택
+- 설정 중 실제 단축키가 실행되는 문제를 구조적으로 방지
+- Hotkey 파싱 로직 개선
+- 대소문자/공백/표기 차이(ctrl + shift + space 등) 허용
+- modifier → main key → modifier 해제 순서로 입력 안정화
+- Edit Window 레이아웃 재정리
+- 높이 및 스크롤 구조 개선으로 안내 문구/Keywords 영역 잘림 문제 해결
 
-### Documentation
-- README 전면 개편 (한글 / 영어)
-  - 플러그인 사용 방법, 실행 방식, Hotkey 기능 정리
-  - Import / Export 및 presets 사용 가이드 추가
-- 국가별 preset 예제(Default / KR / CN / JP) 제공
-  - 기본값 중심의 샘플 구성
-  - 사용자 커스터마이징 전제 설계
+### Fixed
+- Hotkey 실행 시 SendInput failed (Win32Error=87) 오류 수정
+- Win32 INPUT 구조체 크기 불일치 문제 해결(x64 환경 대응)
+- Hotkey 기능 추가 이후 웹 URL / 로컬 프로그램 실행이 동작하지 않던 문제 수정
+- 실행 분기 로직 재정리로 hotkey / path 실행 간 간섭 제거
+- JSON Export 시 한글이 \uXXXX 형태로 이스케이프되던 문제 수정
+- BOM 없는 UTF-8로 저장하여 메모장/편집기 호환성 확보
+- Settings에서 키워드 Add/Edit 후 목록이 즉시 갱신되지 않던 문제 수정
+- 수정 사항이 즉시 UI에 반영되도록 데이터 갱신 방식 개선
+- JSON Import 시 Hotkey 필드가 정상적으로 로드되지 않던 문제 수정
 
 ## [2.0.1] - 2026-01-14
 
