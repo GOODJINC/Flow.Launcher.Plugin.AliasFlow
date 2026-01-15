@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Controls;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
+using System.Windows.Controls;
+
 using Flow.Launcher.Plugin;
+
 using Flow.Launcher.Plugin.AliasFlow.Models;
 using Flow.Launcher.Plugin.AliasFlow.Services;
 using Flow.Launcher.Plugin.AliasFlow.ViewModels;
@@ -14,7 +16,7 @@ using Flow.Launcher.Plugin.AliasFlow.Views;
 
 namespace Flow.Launcher.Plugin.AliasFlow;
 
-public class Main : IPlugin, ISettingProvider
+public sealed class Main : IPlugin, ISettingProvider
 {
     private PluginInitContext? _context;
     private KeywordRepository? _repo;
@@ -28,7 +30,7 @@ public class Main : IPlugin, ISettingProvider
 
         var pluginDir = context.CurrentPluginMetadata?.PluginDirectory;
         if (string.IsNullOrWhiteSpace(pluginDir))
-            pluginDir = AppDomain.CurrentDomain.BaseDirectory; // fallback
+            pluginDir = AppDomain.CurrentDomain.BaseDirectory;
 
         _repo = new KeywordRepository(pluginDir);
         _settingsVm = new SettingsViewModel(_repo);
@@ -37,155 +39,313 @@ public class Main : IPlugin, ISettingProvider
 
         _settingsVm.KeywordsChanged += (_, __) =>
         {
-            if (_repo is not null)
-                _cache = _repo.Load();
-        };
-    }
-
-    public List<Result> Query(Query query)
-{
-    var qRaw = (query?.Search ?? "").Trim();
-    IEnumerable<KeywordEntry> items = _cache;
-
-    // 초성 쿼리 판정
-    var isInitialQuery = KoreanInitialSearch.IsChoseongQuery(qRaw);
-    var qInitial = isInitialQuery ? KoreanInitialSearch.NormalizeInitialQuery(qRaw) : "";
-
-    // 초성일 때는 스코어링해서 정렬
-    if (!string.IsNullOrEmpty(qRaw))
-    {
-        if (isInitialQuery)
-        {
-            items = items
-                .Select(x => new
-                {
-                    Item = x,
-                    Score = GetInitialScore(x, qInitial)
-                })
-                .Where(x => x.Score > 0)
-                .OrderByDescending(x => x.Score)
-                .ThenBy(x => x.Item.Title, StringComparer.OrdinalIgnoreCase)
-                .Select(x => x.Item);
-        }
-        else
-        {
-            // 일반 검색(기존 로직)
-            items = items.Where(x =>
-                (!string.IsNullOrWhiteSpace(x.Title) && x.Title.Contains(qRaw, StringComparison.OrdinalIgnoreCase)) ||
-                (!string.IsNullOrWhiteSpace(x.Description) && x.Description.Contains(qRaw, StringComparison.OrdinalIgnoreCase)) ||
-                (!string.IsNullOrWhiteSpace(x.Path) && x.Path.Contains(qRaw, StringComparison.OrdinalIgnoreCase)) ||
-                (x.Keywords?.Any(k => !string.IsNullOrWhiteSpace(k) && k.Contains(qRaw, StringComparison.OrdinalIgnoreCase)) ?? false)
-            );
-        }
-    }
-
-    return items.Select(x => new Result
-    {
-        Title = x.Title,
-        SubTitle = string.IsNullOrWhiteSpace(x.Description) ? x.Path : $"{x.Description}  |  {x.Path}",
-        IcoPath = "icon.png",
-        Action = _ =>
-{
-    try
-    {
-        var raw = (x.Path ?? "").Trim();
-        if (string.IsNullOrWhiteSpace(raw))
-            return false;
-
-        // URL은 그대로 ShellExecute로 오픈
-        var expanded = ExpandAndClean(raw);
-        if (Uri.TryCreate(expanded, UriKind.Absolute, out var uri) &&
-            (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
-        {
-            Process.Start(new ProcessStartInfo
+            try
             {
-                FileName = expanded,
-                UseShellExecute = true
-            });
-            return true;
-        }
-
-        // 파일/프로그램/폴더 실행: 공백 포함 경로를 깨지 않게 파싱
-        ParseExecutableAndArgs(raw, out var exe, out var args);
-        exe = ExpandAndClean(exe);
-        args = (args ?? "").Trim();
-
-        if (string.IsNullOrWhiteSpace(exe))
-            return false;
-
-        // working dir 추정
-        string? wd = null;
-        if (File.Exists(exe))
-            wd = Path.GetDirectoryName(exe);
-        else if (Directory.Exists(exe))
-            wd = exe;
-
-        var psi = new ProcessStartInfo
-        {
-            FileName = exe,
-            Arguments = args,
-            UseShellExecute = true
+                _cache = _repo.Load();
+            }
+            catch (Exception ex)
+            {
+                NotifyError("Alias Flow", $"Reload failed: {ex.Message}");
+            }
         };
-
-        if (!string.IsNullOrWhiteSpace(wd) && Directory.Exists(wd))
-            psi.WorkingDirectory = wd;
-
-        Process.Start(psi);
-        return true;
     }
-    catch
-    {
-        return false;
-    }
-}
-
-
-    }).ToList();
-}
 
     public Control CreateSettingPanel()
     {
         if (_settingsVm is null)
         {
-            return new ContentControl
-            {
-                Content = "Settings not initialized."
-            };
+            return new ContentControl { Content = "Settings not initialized." };
         }
 
         return new SettingsPanel(_settingsVm);
     }
 
-    private static void SplitCommand(string command, out string exe, out string args)
+    public List<Result> Query(Query query)
     {
-        command = (command ?? "").Trim();
+        var qRaw = (query?.Search ?? "").Trim();
+        IEnumerable<KeywordEntry> items = _cache;
 
-        if (command.StartsWith("\"", StringComparison.Ordinal))
+        if (!string.IsNullOrEmpty(qRaw))
         {
-            var end = command.IndexOf("\"", 1, StringComparison.Ordinal);
-            if (end > 1)
+            var isInitialQuery = KoreanInitialSearch.IsChoseongQuery(qRaw);
+            var qInitial = isInitialQuery ? KoreanInitialSearch.NormalizeInitialQuery(qRaw) : "";
+
+            if (isInitialQuery)
             {
-                exe = command.Substring(1, end - 1);
-                args = command.Substring(end + 1).Trim();
-                return;
+                items = items
+                    .Select(x => new { Item = x, Score = GetInitialScore(x, qInitial) })
+                    .Where(x => x.Score > 0)
+                    .OrderByDescending(x => x.Score)
+                    .ThenBy(x => x.Item.Title, StringComparer.OrdinalIgnoreCase)
+                    .Select(x => x.Item);
+            }
+            else
+            {
+                items = items.Where(x =>
+                    ContainsIgnoreCase(x.Title, qRaw) ||
+                    ContainsIgnoreCase(x.Description, qRaw) ||
+                    ContainsIgnoreCase(x.Path, qRaw) ||
+                    ContainsIgnoreCase(x.Hotkey, qRaw) ||
+                    (x.Keywords?.Any(k => ContainsIgnoreCase(k, qRaw)) ?? false)
+                );
             }
         }
 
-        var firstSpace = command.IndexOf(' ');
-        if (firstSpace < 0)
+        return items.Select(x => new Result
         {
-            exe = command;
+            Title = x.Title,
+            SubTitle = BuildSubtitle(x),
+            IcoPath = "icon.png",
+            Action = _ => ExecuteEntry(x)
+        }).ToList();
+    }
+
+    private bool ExecuteEntry(KeywordEntry x)
+    {
+        try
+        {
+            // 1) Hotkey 우선
+
+            var hk = (x.Hotkey ?? "").Trim();
+            if (!string.IsNullOrWhiteSpace(hk))
+            {
+                var ok = HotkeySender.TrySendHotkey(hk, out var err);
+                if (ok) return true;
+                NotifyError("Alias Flow", $"Hotkey failed: {hk}\n{err}");
+                // hotkey 실패해도 path가 있으면 이어서 시도
+            }
+
+
+            // 2) Path 실행
+            var rawPath = (x.Path ?? "").Trim();
+            if (string.IsNullOrWhiteSpace(rawPath))
+            {
+                // hotkey도 없고 path도 없으면 실행할 게 없음
+                NotifyError("Alias Flow", "No action: both hotkey and path are empty.");
+                return false;
+            }
+
+            var expanded = ExpandAndClean(rawPath);
+
+            // URL이면 기본 브라우저로
+            if (Uri.TryCreate(expanded, UriKind.Absolute, out var uri) &&
+                (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
+            {
+                return TryOpenWithShellExecute(expanded, args: null, workingDir: null);
+            }
+
+            // 파일/폴더/프로그램(+args) 실행
+            ParseExecutableAndArgs(rawPath, out var exe, out var args);
+            exe = ExpandAndClean(exe);
+            args = (args ?? "").Trim();
+
+            if (string.IsNullOrWhiteSpace(exe))
+            {
+                NotifyError("Alias Flow", $"Invalid path: {rawPath}");
+                return false;
+            }
+
+            // working dir 추정
+            string? wd = null;
+            if (File.Exists(exe))
+                wd = Path.GetDirectoryName(exe);
+            else if (Directory.Exists(exe))
+                wd = exe;
+
+            // 핵심: UseShellExecute=true로 OS에 맡김 (프로그램/파일/폴더/링크 모두)
+            var opened = TryOpenWithShellExecute(exe, args, wd);
+            if (!opened)
+            {
+                NotifyError("Alias Flow", $"Launch failed: {exe} {args}".Trim());
+                return false;
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            NotifyError("Alias Flow", $"Execute error: {ex.Message}");
+            return false;
+        }
+    }
+
+    private static string BuildSubtitle(KeywordEntry x)
+    {
+        var parts = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(x.Description))
+            parts.Add(x.Description.Trim());
+
+        if (!string.IsNullOrWhiteSpace(x.Path))
+            parts.Add(x.Path.Trim());
+
+        if (!string.IsNullOrWhiteSpace(x.Hotkey))
+            parts.Add($"Hotkey: {x.Hotkey.Trim()}");
+
+        return parts.Count == 0 ? "" : string.Join("  |  ", parts);
+    }
+
+    private void NotifyError(string title, string message)
+    {
+        try
+        {
+            _context?.API?.ShowMsg(title, message);
+        }
+        catch
+        {
+            // Notification 자체가 실패해도 플러그인이 죽지 않게 무시
+        }
+    }
+
+    private static bool ContainsIgnoreCase(string? haystack, string needle)
+    {
+        if (string.IsNullOrWhiteSpace(haystack)) return false;
+        return haystack.Contains(needle, StringComparison.OrdinalIgnoreCase);
+    }
+
+    // -------------------------
+    // 실행 관련 유틸
+    // -------------------------
+
+    private static string ExpandAndClean(string input)
+    {
+        var s = (input ?? "").Trim();
+
+        // 양끝 따옴표 제거
+        if (s.Length >= 2 && s.StartsWith("\"", StringComparison.Ordinal) && s.EndsWith("\"", StringComparison.Ordinal))
+            s = s.Substring(1, s.Length - 2);
+
+        // 환경변수 확장 (%USERNAME% 등)
+        s = Environment.ExpandEnvironmentVariables(s);
+
+        return s.Trim();
+    }
+
+    private static bool TryOpenWithShellExecute(string fileOrUrl, string? args, string? workingDir)
+    {
+        try
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = fileOrUrl,
+                UseShellExecute = true
+            };
+
+            if (!string.IsNullOrWhiteSpace(args))
+                psi.Arguments = args;
+
+            if (!string.IsNullOrWhiteSpace(workingDir) && Directory.Exists(workingDir))
+                psi.WorkingDirectory = workingDir;
+
+            Process.Start(psi);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// 공백 포함 경로를 따옴표 없이 넣어도 실행되도록:
+    /// - 전체가 파일/폴더면 그대로 exe
+    /// - 아니면 토큰을 누적하며 실제 존재하는 경로를 찾고 나머지를 args로 분리
+    /// - 마지막 fallback: 첫 토큰 exe, 나머지 args
+    /// </summary>
+    private static void ParseExecutableAndArgs(string raw, out string exe, out string args)
+    {
+        exe = "";
+        args = "";
+
+        var s = ExpandAndClean(raw);
+        if (string.IsNullOrWhiteSpace(s))
+            return;
+
+        // 전체가 파일/폴더면 그대로
+        if (File.Exists(s) || Directory.Exists(s))
+        {
+            exe = s;
             args = "";
             return;
         }
 
-        exe = command.Substring(0, firstSpace).Trim();
-        args = command.Substring(firstSpace + 1).Trim();
+        // "C:\...\app.exe" args...
+        if (s.StartsWith("\"", StringComparison.Ordinal))
+        {
+            var end = s.IndexOf('"', 1);
+            if (end > 1)
+            {
+                exe = ExpandAndClean(s.Substring(1, end - 1));
+                args = s.Substring(end + 1).Trim();
+                return;
+            }
+        }
+
+        // 공백 토큰 분리
+        var tokens = Regex.Matches(s, @"[^\s]+").Select(m => m.Value).ToList();
+        if (tokens.Count == 0) return;
+
+        // 누적하며 존재하는 경로 찾기
+        for (int i = 0; i < tokens.Count; i++)
+        {
+            var candidate = string.Join(" ", tokens.Take(i + 1));
+            candidate = ExpandAndClean(candidate);
+
+            if (File.Exists(candidate) || Directory.Exists(candidate))
+            {
+                exe = candidate;
+                args = string.Join(" ", tokens.Skip(i + 1));
+                return;
+            }
+        }
+
+        // 마지막 fallback
+        exe = ExpandAndClean(tokens[0]);
+        args = string.Join(" ", tokens.Skip(1));
     }
 
-    internal static class KoreanInitialSearch
+    // -------------------------
+    // 초성 검색 유틸 + 점수
+    // -------------------------
+
+    private static int GetInitialScore(KeywordEntry x, string qInitial)
+    {
+        if (string.IsNullOrWhiteSpace(qInitial)) return 0;
+
+        // Title 우선
+        var titleInitial = KoreanInitialSearch.ToInitialString(x.Title ?? "");
+        if (!string.IsNullOrWhiteSpace(titleInitial))
+        {
+            if (titleInitial.StartsWith(qInitial, StringComparison.Ordinal)) return 500;
+            if (titleInitial.Contains(qInitial, StringComparison.Ordinal)) return 400;
+        }
+
+        // Keywords
+        if (x.Keywords is not null)
+        {
+            foreach (var k in x.Keywords)
+            {
+                var ki = KoreanInitialSearch.ToInitialString(k ?? "");
+                if (ki.Contains(qInitial, StringComparison.Ordinal)) return 300;
+            }
+        }
+
+        // Description
+        var di = KoreanInitialSearch.ToInitialString(x.Description ?? "");
+        if (di.Contains(qInitial, StringComparison.Ordinal)) return 200;
+
+        // Path
+        var pi = KoreanInitialSearch.ToInitialString(x.Path ?? "");
+        if (pi.Contains(qInitial, StringComparison.Ordinal)) return 100;
+
+        // Hotkey도 초성 검색 대상에 넣을 이유는 거의 없지만, 원하면 확장 가능
+        return 0;
+    }
+}
+
+// 파일 내에 같이 둬도 되고, 별도 파일로 분리해도 됨
+internal static class KoreanInitialSearch
 {
-    // 한글 초성 테이블 (19개)
     private static readonly char[] Choseong =
     {
         'ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'
@@ -205,6 +365,13 @@ public class Main : IPlugin, ISettingProvider
         return true;
     }
 
+    public static string NormalizeInitialQuery(string q)
+    {
+        return new string((q ?? "")
+            .Where(c => !char.IsWhiteSpace(c))
+            .ToArray());
+    }
+
     public static string ToInitialString(string? text)
     {
         if (string.IsNullOrEmpty(text)) return string.Empty;
@@ -217,231 +384,16 @@ public class Main : IPlugin, ISettingProvider
             if (c >= 0xAC00 && c <= 0xD7A3)
             {
                 int syllableIndex = c - 0xAC00;
-                int choseongIndex = syllableIndex / 588; // 21*28=588
+                int choseongIndex = syllableIndex / 588; // 21*28
                 sb.Append(Choseong[choseongIndex]);
             }
             else
             {
-                // 한글 음절이 아니면 그대로 넣거나(원하면 제외해도 됨)
+                // 한글이 아니면 그대로(영문/숫자 등)
                 sb.Append(c);
             }
         }
 
         return sb.ToString();
     }
-
-    public static bool MatchByInitial(string q, params string?[] fields)
-    {
-        if (string.IsNullOrWhiteSpace(q)) return false;
-
-        // 공백 제거한 초성 쿼리
-        var query = new string(q.Where(c => !char.IsWhiteSpace(c)).ToArray());
-
-        foreach (var f in fields)
-        {
-            if (string.IsNullOrWhiteSpace(f)) continue;
-
-            var initials = ToInitialString(f);
-            if (initials.Contains(query, StringComparison.Ordinal))
-                return true;
-        }
-
-        return false;
-    }
-
-    public static string NormalizeInitialQuery(string q)
-{
-    return new string((q ?? "")
-        .Where(c => !char.IsWhiteSpace(c))
-        .ToArray());
-}
-
-}
-private static int GetInitialScore(KeywordEntry x, string qInitial)
-{
-    if (string.IsNullOrWhiteSpace(qInitial)) return 0;
-
-    // Title
-    var title = x.Title ?? "";
-    var titleInitial = KoreanInitialSearch.ToInitialString(title);
-
-    if (!string.IsNullOrWhiteSpace(titleInitial))
-    {
-        // 1) Title 초성 prefix 일치 (최상)
-        if (titleInitial.StartsWith(qInitial, StringComparison.Ordinal))
-            return 500;
-
-        // 2) Title 초성 contains (차상)
-        if (titleInitial.Contains(qInitial, StringComparison.Ordinal))
-            return 400;
-    }
-
-    // 3) Keywords 초성 일치
-    if (x.Keywords is not null)
-    {
-        foreach (var k in x.Keywords)
-        {
-            if (string.IsNullOrWhiteSpace(k)) continue;
-            var ki = KoreanInitialSearch.ToInitialString(k);
-            if (ki.Contains(qInitial, StringComparison.Ordinal))
-                return 300;
-        }
-    }
-
-    // 4) Description 초성 일치
-    var desc = x.Description ?? "";
-    if (!string.IsNullOrWhiteSpace(desc))
-    {
-        var di = KoreanInitialSearch.ToInitialString(desc);
-        if (di.Contains(qInitial, StringComparison.Ordinal))
-            return 200;
-    }
-
-    // 5) Path 초성 일치 (보통 한글이 적지만, 포함)
-    var path = x.Path ?? "";
-    if (!string.IsNullOrWhiteSpace(path))
-    {
-        var pi = KoreanInitialSearch.ToInitialString(path);
-        if (pi.Contains(qInitial, StringComparison.Ordinal))
-            return 100;
-    }
-
-    return 0;
-}
-private static bool TryOpenWithShellExecute(string fileOrUrl, string? args = null, string? workingDir = null)
-{
-    try
-    {
-        fileOrUrl = (fileOrUrl ?? "").Trim();
-        args = (args ?? "").Trim();
-
-        if (string.IsNullOrWhiteSpace(fileOrUrl))
-            return false;
-
-        // 폴더면 탐색기로 열기
-        if (Directory.Exists(fileOrUrl))
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = fileOrUrl,
-                UseShellExecute = true
-            });
-            return true;
-        }
-
-        // 파일/프로그램/URL 모두 ShellExecute로 처리
-        var psi = new ProcessStartInfo
-        {
-            FileName = fileOrUrl,
-            UseShellExecute = true
-        };
-
-        if (!string.IsNullOrWhiteSpace(args))
-            psi.Arguments = args;
-
-        if (!string.IsNullOrWhiteSpace(workingDir) && Directory.Exists(workingDir))
-            psi.WorkingDirectory = workingDir;
-
-        Process.Start(psi);
-        return true;
-    }
-    catch
-    {
-        return false;
-    }
-}
-
-// 기존 SplitCommand를 활용하되, 실행 시 working dir도 추정
-private static string? GuessWorkingDirectory(string exePath)
-{
-    try
-    {
-        if (string.IsNullOrWhiteSpace(exePath)) return null;
-
-        // 상대경로/환경변수 확장된 경우도 고려
-        exePath = Environment.ExpandEnvironmentVariables(exePath);
-
-        // 파일이 존재하면 그 폴더를 working dir로
-        if (File.Exists(exePath))
-            return Path.GetDirectoryName(exePath);
-
-        return null;
-    }
-    catch
-    {
-        return null;
-    }
-}
-private static string ExpandAndClean(string input)
-{
-    var s = (input ?? "").Trim();
-
-    // 앞뒤 따옴표 제거
-    if (s.Length >= 2 && s.StartsWith("\"") && s.EndsWith("\""))
-        s = s.Substring(1, s.Length - 2);
-
-    // %USERNAME% 같은 환경변수 확장
-    s = Environment.ExpandEnvironmentVariables(s);
-
-    return s.Trim();
-}
-private static void ParseExecutableAndArgs(string raw, out string exe, out string args)
-{
-    exe = "";
-    args = "";
-
-    var s = ExpandAndClean(raw);
-    if (string.IsNullOrWhiteSpace(s))
-        return;
-
-    // 1) 전체 문자열이 이미 파일/폴더 경로라면 그대로 실행(공백 포함해도 OK)
-    if (File.Exists(s) || Directory.Exists(s))
-    {
-        exe = s;
-        args = "";
-        return;
-    }
-
-    // 2) 따옴표로 감싼 exe "C:\...\app.exe" args...
-    if (s.StartsWith("\""))
-    {
-        // 이 경우 ExpandAndClean에서 바깥따옴표가 제거되므로 여기 들어올 확률은 낮지만,
-        // 혹시 남아있다면 처리
-        var end = s.IndexOf('"', 1);
-        if (end > 1)
-        {
-            exe = s.Substring(1, end - 1);
-            args = s.Substring(end + 1).Trim();
-            exe = ExpandAndClean(exe);
-            return;
-        }
-    }
-
-    // 3) 공백으로 split 후, "존재하는 파일"이 될 때까지 앞 토큰을 늘려가며 후보 검사
-    //    예: C:\Program Files\Kakao\KakaoTalk\KakaoTalk.exe
-    var tokens = Regex.Matches(s, @"[^\s]+").Select(m => m.Value).ToList();
-    if (tokens.Count == 0) return;
-
-    for (int i = 0; i < tokens.Count; i++)
-    {
-        var candidate = string.Join(" ", tokens.Take(i + 1));
-        candidate = ExpandAndClean(candidate);
-
-        // 후보가 실제 파일/폴더이면 확정
-        if (File.Exists(candidate) || Directory.Exists(candidate))
-        {
-            exe = candidate;
-            args = string.Join(" ", tokens.Skip(i + 1));
-            return;
-        }
-
-        // 후보가 .exe/.lnk/.cmd/.bat 등으로 끝나면(경로는 맞지만 아직 존재 판단 실패할 수 있음)
-        // 다음 단계로 넘기되, 마지막에 fallback로 사용 가능
-    }
-
-    // 4) fallback: 기존 방식(첫 토큰 exe, 나머지 args)
-    exe = ExpandAndClean(tokens[0]);
-    args = string.Join(" ", tokens.Skip(1));
-}
-
 }

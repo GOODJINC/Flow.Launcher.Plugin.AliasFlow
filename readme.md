@@ -2,93 +2,150 @@
 
 # Alias Flow 🚀
 
-Alias Flow is a dedicated plugin for Flow Launcher that supports user-defined aliases and Korean Initial Consonant (Chosung) search. It maximizes workflow efficiency by allowing you to execute complex program paths and long website URLs with just a few keystrokes.
+**Alias Flow** is a Flow Launcher plugin that allows you to quickly launch **websites, local applications, and global hotkeys** using custom keywords.
 
-## ✨Key Features
+It supports **Korean initial consonant (Chosung) search** and a full GUI-based configuration.
 
-|Feature|Description|
-|------|---|
-|**Korean Chosung Search**|Supports intelligent search where you can find `네이버` by simply typing its initials `ㄴㅇㅂ`.|
-|**Multi-Alias Mapping**|Map multiple keywords to a single target. (e.g., `Firefox` → `파폭`, `ff`, `browser`)|
-|**Zero-Dependency**|Lightweight architecture that runs instantly in a default Python environment without external libraries.|
-|**Integrated Launcher**|Manage both local `executable files (.exe)` and `Web URLs` in a single unified list.|
-|**Easy Backup**|Export, configure, or sync all settings using a single `keywords.json` file.|
+## ✨ Key Features
+
+### 🔍 Smart Search
+- **Korean Chosung search**
+  - `네이버` → `ㄴㅇㅂ`
+  - No need to register initials manually
+- **Title-priority sorting**
+  - Exact and initial matches appear first
+
+### 🚀 Execution Types
+- Launch **Web URLs**
+- Launch **Local applications (.exe)**
+- Trigger **Global keyboard shortcuts**
+  - e.g. `Ctrl + Shift + Space` (1Password)
+
+### ⚙️ Configuration
+- Full **GUI-based add / edit / delete**
+- **JSON Import / Export**
+  - UTF-8 (no BOM)
+  - Fully compatible with Windows Notepad
+- Environment variables supported  
+  (`%USERNAME%`, `%APPDATA%`, etc.)
 
 ## 🛠 Installation
 
-### 1. Requirements
+### Requirements
+- Latest **Flow Launcher**
+- Windows 10 / 11
 
-- **Flow Launcher v1.8 or higher**: Python environment is **automatically handled** by [Flow Launcher](https://www.flowlauncher.com/).
-- *(For older versions: Manual installation of **Python 3.x** is required.)*
+### Steps
+1. Download the latest ZIP from GitHub Releases
+2. Extract to: 
+```
+%AppData%\FlowLauncher\Plugins\AliasFlow
+```
 
-### 2. Steps
-
-1. Download the ZIP file from this repository and extract it.
-
-2. Copy the `AliasFlow` folder into the following directory: `%AppData%\FlowLauncher\Plugins\AliasFlow`
-
-3. Restart Flow Launcher.
-
+3. Restart Flow Launcher
 
 ## 🚀 Usage
 
-The default action keyword is `af`.
+Default action keyword: **`af`**
 
-**Search & Execute**: Type `af` followed by a keyword or Korean initials.
+### Examples
 
-**Example**: `af ㄴㅇㅂ` → Launches Naver in your browser.
-
-**Example**: `af ff` → Launches Firefox.
-
-**Settings Management**: Type `af 설정` or `af config` to open the folder containing your data files.
-
-## ⚙️ Configuration
-
-You can customize your execution list by editing the `keywords.json` file.
-
-```json
-[
-  {
-    "title": "네이버",
-    "description": "Naver 포털 및 메일 확인",
-    "path": "https://www.naver.com",
-    "keywords": ["네이버", "naver"]
-  },
-  {
-    "title": "파이어폭스",
-    "description": "Firefox 브라우저 실행",
-    "path": "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
-    "keywords": ["파이어폭스", "파폭", "브라우저", "firefox", "ff"]
-  },
-  {
-    "title": "설정 폴더 열기",
-    "description": "Alias Flow 설정 및 백업 (keywords.json)",
-    "path": "open_config_folder",
-    "keywords": ["설정", "백업", "config", "backup"]
-  }
-]
+```
+af naver
+af ㄴㅇㅂ
+af kakao
 ```
 
-- Note: When entering local paths, you must use double backslashes (**\\**).
 
+### Execution
 
-## 📂 File Structure
-
-```plain
-AliasFlow/
-├── presets/             # Keyword Presets by Country
-│   ├── ko-KR.json
-│   ├── en-US.json
-│   ├── ja-JP.json
-│   └── zh-CN.json
-├── plugin.json          # Plugin metadata
-├── main.py              # Chosung search and execution logic
-├── keywords.json        # Default Keywords (User Editable)
-└── icon.png             # Plugin icon
-```
+|Input|Action|
+|---|---|
+|`af naver`|Open Naver website|
+|`af kakao`|Launch KakaoTalk|
+|`af 1password`|Trigger global hotkey|
 
 ---
 
-📄 This project is licensed under the **MIT License**.
+## ⌨️ Hotkey Example
 
-👨‍💻 **Author**: [GOODJINC](https://goodjinc.com)
+```json
+{
+  "title": "1Password",
+  "description": "Quick access",
+  "hotkey": "Ctrl+Shift+Space",
+  "keywords": ["1password"]
+}
+```
+
+- If `hotkey` is set, Alias Flow sends the key combination instead of launching a path
+
+- Admin-level apps may require Flow Launcher to run as administrator
+
+## 📂 keywords.json Structure
+
+| Field       | Description                |
+| ----------- | -------------------------- |
+| title       | Display name               |
+| description | Description                |
+| path        | URL or executable path     |
+| keywords    | Search keywords            |
+| hotkey      | Global shortcut (optional) |
+
+## 📦 Import / Export
+
+- Import / Export settings via GUI
+- UTF-8 (no BOM)
+- Ideal for backup and sync
+
+## 📦 Preset Guide
+
+Alias Flow provides optional **regional preset JSON files** in addition to the default configuration.  
+Presets are intended as **starting points**, not final configurations.
+
+### Available Presets
+- **Default (English)** – Base configuration
+- **Korea (KR)** – Naver, KakaoTalk, etc.
+- **China (CN)** – Baidu, WeChat, etc.
+- **Japan (JP)** – Yahoo Japan, LINE, etc.
+
+Preset files are organized as follows:
+
+```
+presets/
+├─ default.en.json
+├─ korea.ko.json
+├─ china.zh.json
+└─ japan.ja.json
+```
+
+
+### 📥 Importing a Preset
+
+1. Open Flow Launcher
+2. Go to **Settings → Plugins → Alias Flow**
+3. Click **Import JSON**
+4. Select a preset JSON file
+
+Imported presets are **merged into your existing configuration**.  
+You can freely remove or edit any entry afterward.
+
+---
+
+### ✏️ Customization Notes
+
+- Presets include only **minimal default values**
+- Modify keywords, paths, and hotkeys to fit your environment
+- Korean initial (chosung) search works automatically — no need to add initials manually
+
+> Presets are designed to help you get started quickly.
+
+
+
+## 📄 라이선스
+
+MIT License
+
+## 👨‍💻 제작자
+
+[GOODJINC](https://goodjinc.com)

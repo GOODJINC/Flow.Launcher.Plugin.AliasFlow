@@ -1,0 +1,121 @@
+[
+  {
+    "title": "네이버",
+    "description": "한국 포털 및 검색",
+    "path": "https://www.naver.com",
+    "hotkey": "",
+    "keywords": ["네이버", "naver", "검색", "포털"]
+  },
+  {
+    "title": "다음",
+    "description": "다음 포털 서비스",
+    "path": "https://www.daum.net",
+    "hotkey": "",
+    "keywords": ["다음", "daum", "포털"]
+  },
+  {
+    "title": "카카오톡",
+    "description": "카카오톡 메신저",
+    "path": "C:\\Program Files\\Kakao\\KakaoTalk\\KakaoTalk.exe",
+    "hotkey": "",
+    "keywords": ["카카오톡", "카톡", "kt", "kakao"]
+  },
+  {
+    "title": "YouTube",
+    "description": "유튜브 동영상 플랫폼",
+    "path": "https://www.youtube.com",
+    "hotkey": "",
+    "keywords": ["유튜브", "yt", "youtube", "동영상"]
+  },
+  {
+    "title": "Google",
+    "description": "구글 검색",
+    "path": "https://www.google.com",
+    "hotkey": "",
+    "keywords": ["구글", "google", "gg", "검색"]
+  },
+  {
+    "title": "쿠팡",
+    "description": "온라인 쇼핑",
+    "path": "https://www.coupang.com",
+    "hotkey": "",
+    "keywords": ["쿠팡", "coupang", "쇼핑", "구매"]
+  },
+  {
+    "title": "11번가",
+    "description": "온라인 쇼핑몰",
+    "path": "https://www.11st.co.kr",
+    "hotkey": "",
+    "keywords": ["11번가", "11st", "쇼핑"]
+  },
+  {
+    "title": "GitHub",
+    "description": "코드 저장소 관리",
+    "path": "https://github.com",
+    "hotkey": "",
+    "keywords": ["깃허브", "github", "gh", "코드", "repo"]
+  },
+    {
+    "title": "Gemini",
+    "description": "AI 챗봇 및 어시스턴트",
+    "path": "https://gemini.google.com/",
+    "hotkey": "",
+    "keywords": ["제미나이", "gemini", "ai", "llm"]
+  },
+  {
+    "title": "ChatGPT",
+    "description": "AI 챗봇 및 어시스턴트",
+    "path": "https://chatgpt.com",
+    "hotkey": "",
+    "keywords": ["챗지피티", "chatgpt", "ai", "gpt", "llm"]
+  },
+  {
+    "title": "Claude",
+    "description": "Anthropic AI 어시스턴트",
+    "path": "https://claude.ai",
+    "hotkey": "Ctrl+Alt+Space",
+    "keywords": ["클로드", "claude", "ai", "llm"]
+  },
+  {
+    "title": "VS Code",
+    "description": "비주얼 스튜디오 코드 에디터",
+    "path": "C:\\Users\\%USERNAME%\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+    "hotkey": "",
+    "keywords": ["비주얼스튜디오", "vscode", "코드", "에디터", "편집기"]
+  },
+  {
+    "title": "Discord",
+    "description": "디스코드 메신저",
+    "path": "C:\\Users\\%USERNAME%\\AppData\\Local\\Discord\\Update.exe --processStart Discord.exe",
+    "hotkey": "Ctrl+Shift+T",
+    "keywords": ["디스코드", "discord", "dc", "채팅"]
+  },
+  {
+    "title": "네이버 메일",
+    "description": "네이버 이메일 서비스",
+    "path": "https://mail.naver.com",
+    "hotkey": "",
+    "keywords": ["네이버메일", "메일", "이메일", "mail"]
+  },
+  {
+    "title": "Gmail",
+    "description": "구글 이메일",
+    "path": "https://mail.google.com",
+    "hotkey": "",
+    "keywords": ["지메일", "gmail", "메일"]
+  },
+  {
+    "title": "인스타그램",
+    "description": "소셜 미디어 플랫폼",
+    "path": "https://www.instagram.com",
+    "hotkey": "",
+    "keywords": ["인스타그램", "인별", "instagram", "ig"]
+  },
+  {
+    "title": "Open Config Folder",
+    "description": "Alias Flow 설정 및 keywords.json 관리",
+    "path": "open_config_folder",
+    "hotkey": "",
+    "keywords": ["config", "설정", "환경설정", "settings"]
+  }
+]

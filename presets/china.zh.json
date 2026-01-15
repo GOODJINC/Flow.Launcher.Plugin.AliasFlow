@@ -1,0 +1,23 @@
+[
+  {
+    "title": "Baidu",
+    "description": "Chinese Search Engine",
+    "path": "https://www.baidu.com",
+    "keywords": ["baidu", "search"],
+    "hotkey": ""
+  },
+  {
+    "title": "WeChat",
+    "description": "WeChat Messenger",
+    "path": "",
+    "keywords": ["wechat", "weixin"],
+    "hotkey": ""
+  },
+  {
+    "title": "Alibaba",
+    "description": "E-commerce Platform",
+    "path": "https://www.alibaba.com",
+    "keywords": ["alibaba", "shopping"],
+    "hotkey": ""
+  }
+]

@@ -2,6 +2,29 @@
 
 이 프로젝트의 주요 변경사항 정리
 
+## [2.0.2] - 2026-01-15
+
+### Added
+- 키워드 실행 시 글로벌 키보드 단축키(Hotkey) 트리거 기능 추가
+    - hotkey 필드를 통해 Ctrl+Shift+Space 등 전역 단축키를 직접 실행 가능
+    - path 실행 없이 단축키 기반으로 동작하는 앱(예: 1Password) 지원
+
+### Fixed
+- Hotkey 실행 시 SendInput failed (Win32Error=87) 오류가 발생하던 문제 수정
+    - Win32 INPUT 구조체 크기 불일치로 인한 오류 원인을 해결
+    - x64 환경에서 OS 기대 크기에 맞도록 INPUTUNION 구조 재정의
+- Hotkey 실행 실패 시 원인을 알 수 없던 문제 개선
+        - 실패 시 Win32 Error 코드 및 상세 원인을 사용자 알림으로 표시하도록 개선
+- Hotkey 기능 추가 이후 웹 URL / 로컬 프로그램 실행이 동작하지 않던 문제 수정
+- 실행 분기 로직을 재정리하여 hotkey / path 실행이 서로 간섭하지 않도록 처리
+
+### Changed
+- 런타임에 필요하지 않은 JetBrains.Annotations.dll 파일을 릴리즈 산출물에서 제외
+- Hotkey 입력 파싱 로직 강화
+    - Ctrl + Shift + Space, ctrl+shift+space 등 다양한 표기 방식 허용
+    - modifier / main key 분리 및 실행 순서 안정화
+- Hotkey 실행 시 modifier → main → modifier 해제 순서로 입력되도록 동작 방식 정교화
+
 ## [2.0.1] - 2026-01-14
 
 ### Added

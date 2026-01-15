@@ -1,0 +1,23 @@
+[
+  {
+    "title": "Yahoo Japan",
+    "description": "Japanese Portal",
+    "path": "https://www.yahoo.co.jp",
+    "keywords": ["yahoo", "japan"],
+    "hotkey": ""
+  },
+  {
+    "title": "LINE",
+    "description": "LINE Messenger",
+    "path": "",
+    "keywords": ["line", "messenger"],
+    "hotkey": ""
+  },
+  {
+    "title": "Rakuten",
+    "description": "Online Shopping",
+    "path": "https://www.rakuten.co.jp",
+    "keywords": ["rakuten", "shopping"],
+    "hotkey": ""
+  }
+]

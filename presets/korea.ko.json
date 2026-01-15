@@ -1,0 +1,30 @@
+[
+  {
+    "title": "네이버",
+    "description": "한국 포털 사이트",
+    "path": "https://www.naver.com",
+    "keywords": ["naver", "portal"],
+    "hotkey": ""
+  },
+  {
+    "title": "카카오톡",
+    "description": "카카오톡 메신저",
+    "path": "C:\\Program Files\\Kakao\\KakaoTalk\\KakaoTalk.exe",
+    "keywords": ["kakao", "talk", "messenger"],
+    "hotkey": ""
+  },
+  {
+    "title": "다음",
+    "description": "Daum Portal",
+    "path": "https://www.daum.net",
+    "keywords": ["daum"],
+    "hotkey": ""
+  },
+  {
+    "title": "쿠팡",
+    "description": "Online Shopping",
+    "path": "https://www.coupang.com",
+    "keywords": ["coupang", "shopping"],
+    "hotkey": ""
+  }
+]
