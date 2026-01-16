@@ -1,0 +1,93 @@
+[
+  {
+    "title": "네이버",
+    "description": "한국 포털 및 검색",
+    "path": "https://www.naver.com",
+    "hotkey": "",
+    "keywords": ["naver", "sdq", "spdlqj"]
+  },
+  {
+    "title": "다음",
+    "description": "다음 포털 서비스",
+    "path": "https://www.daum.net",
+    "hotkey": "",
+    "keywords": ["daum", "ed"]
+  },
+  {
+    "title": "카카오톡",
+    "description": "카카오톡 메신저",
+    "path": "C:\\Program Files\\Kakao\\KakaoTalk\\KakaoTalk.exe",
+    "hotkey": "",
+    "keywords": ["카톡", "kakao", "zkzkdhxhr", "zx"]
+  },
+  {
+    "title": "유튜브",
+    "description": "유튜브 동영상 플랫폼",
+    "path": "https://www.youtube.com",
+    "hotkey": "",
+    "keywords": ["yt", "youtube", "dbxbqm"]
+  },
+  {
+    "title": "구글",
+    "description": "구글 검색",
+    "path": "https://www.google.com",
+    "hotkey": "",
+    "keywords": ["google", "gg", "rnrmf"]
+  },
+  {
+    "title": "깃허브",
+    "description": "코드 저장소 관리",
+    "path": "https://github.com",
+    "hotkey": "",
+    "keywords": ["github", "gh", "rltgjqm", "rgq"]
+  },
+    {
+    "title": "제미나이",
+    "description": "AI 챗봇 및 어시스턴트",
+    "path": "https://gemini.google.com/",
+    "hotkey": "",
+    "keywords": ["gemini", "ai", "wpalskdl"]
+  },
+  {
+    "title": "챗지피티",
+    "description": "AI 챗봇 및 어시스턴트",
+    "path": "https://chatgpt.com",
+    "hotkey": "",
+    "keywords": ["chatgpt", "ai"]
+  },
+  {
+    "title": "클로드",
+    "description": "Anthropic AI 어시스턴트",
+    "path": "https://claude.ai",
+    "hotkey": "Ctrl+Alt+Space",
+    "keywords": ["claude", "ai"]
+  },
+  {
+    "title": "비주얼스튜디오 코드",
+    "description": "비주얼 스튜디오 코드 에디터",
+    "path": "C:\\Users\\%USERNAME%\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+    "hotkey": "",
+    "keywords": ["vscode", "visual studio code"]
+  },
+  {
+    "title": "1패스워드",
+    "description": "비밀번호 관리자",
+    "path": "c:\\Users\\%USERNAME%\\AppData\\Local\\Microsoft\\WindowsApps\\1Password.exe",
+    "hotkey": "Ctrl+Shift+Space",
+    "keywords": ["1Password", "비밀번호"]
+  },
+  {
+    "title": "투두이스트",
+    "description": "작업 관리자이자 할일 목록 앱",
+    "path": "C:\\Users\\%USERNAME%\\AppData\\Local\\Programs\\todoist\\Todoist.exe",
+    "hotkey": "Win+Alt+S",
+    "keywords": ["Todoist", "TODO"]
+  },
+  {
+    "title": "플러그인 설정 폴더 열기",
+    "description": "Alias Flow 설정 및 keywords.json 관리",
+    "path": "C:\\Users\\%USERNAME%\\AppData\\Roaming\\FlowLauncher\\Plugins\\AliasFlow",
+    "hotkey": "",
+    "keywords": ["Plugin", "Config", "Settings"]
+  }
+]
