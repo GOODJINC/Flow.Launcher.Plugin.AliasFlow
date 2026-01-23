@@ -6,7 +6,7 @@
   "Author": "GOODJINC",
   "Version": "2.0.2",
   "Language": "csharp",
-  "Website": "https://github.com/goodjinc/Flow.Launcher.Plugin.AliasFlow",
+  "Website": "https://github.com/logitstudio/Flow.Launcher.Plugin.AliasFlow",
   "ExecuteFileName": "Flow.Launcher.Plugin.AliasFlow.dll",
   "IcoPath": "icon.png"
 }
