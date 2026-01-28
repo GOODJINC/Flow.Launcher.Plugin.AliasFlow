@@ -34,8 +34,12 @@ public sealed class Main : IPlugin, ISettingProvider
             pluginDir = AppDomain.CurrentDomain.BaseDirectory;
 
         // (B) ✅ 사용자 데이터 폴더(쓰기 보장): keywords.json 저장/로드는 무조건 여기서만
-        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        var dataDir = Path.Combine(appData, "FlowLauncher", "Settings", "Plugins", "AliasFlow");
+        var dataDir = context.CurrentPluginMetadata?.PluginSettingsDirectoryPath;
+        if (string.IsNullOrWhiteSpace(dataDir))
+        {
+            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            dataDir = Path.Combine(appData, "FlowLauncher", "Settings", "Plugins", "Flow.Launcher.Plugin.AliasFlow");
+        }
         var dataPath = Path.Combine(dataDir, "keywords.json");
 
         // (C) 최초 1회: 패키징된 기본 keywords.json이 있으면 사용자 데이터 경로로 복사
